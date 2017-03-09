@@ -10,41 +10,165 @@
 
 @interface AppDelegate ()
 
+@property (strong, nonatomic) NSMutableArray *array;
+
 @end
 
 @implementation AppDelegate
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    
+        // загружаемся в background
+//    [self performSelectorInBackground:@selector(testThreadInBackground) withObject:nil];
+//    
+//        // autoreleasePool
+//    [self performSelectorInBackground:@selector(autoreleasePool) withObject:nil];
+    
+        // нить
+//    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(autoreleasePool) object:nil];
+//    [thread start];
+    
+    
+//    for (int i = 0; i < 50; i++) {
+//        NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(autoreleasePool) object:nil];
+//        thread.name = [NSString stringWithFormat:@"Thread #%d", i];
+//        [thread start];
+//    }
+//    NSLog(@"с помощью @autoreleasepool");
+    self.array = [NSMutableArray array];
+//    NSThread *threadOne = [[NSThread alloc] initWithTarget:self selector:@selector(addStringToMutableArray:) object:@"x"];
+//    threadOne.name = @"threadOne";
+//    [threadOne start];
+//    
+//    NSThread *threadTwo = [[NSThread alloc] initWithTarget:self selector:@selector(addStringToMutableArray:) object:@"y"];
+//    threadTwo.name = @"threadTwo";
+//    [threadTwo start];
+//
+//    [self performSelector:@selector(printArray) withObject:nil afterDelay:2];
+
+    
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        mmmm
+//    });
+    
+    
+//    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    
+//    dispatch_async(queue, ^{
+//        double startTime = CACurrentMediaTime();
+//        NSLog(@"%@ was started", [[NSThread currentThread] name]); // возвращает имя текущего потока
+//        for (int i = 0; i < 20000000; i++) {
+//            //            NSLog(@"%d", i);
+//        }
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            NSLog(@"%@ was finished %f", [[NSThread currentThread] name], CACurrentMediaTime() - startTime);
+//        });
+//    });
+    
+    
+    
+    
+    
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        [self addStringToMutableArray:@"x"];
+//    });
+//    
+//    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        [self addStringToMutableArray:@"y"];
+//    });
+//    [self performSelector:@selector(printArray) withObject:nil afterDelay:3];
+    
+    
+    
+    
+    
+        // выполняется последлвательно
+//    dispatch_async(dispatch_queue_create("com.Multithreading.lecture", DISPATCH_QUEUE_SERIAL), ^{
+//        [self addStringToMutableArray:@"x"];
+//    });
+//    dispatch_async(dispatch_queue_create("com.Multithreading.lecture", DISPATCH_QUEUE_SERIAL), ^{
+//        [self addStringToMutableArray:@"y"];
+//    });
+    
+                // или так
+    
+    dispatch_queue_t queue = dispatch_queue_create("qweqweqwe.com", DISPATCH_QUEUE_SERIAL);
+    dispatch_async(queue, ^{
+        [self addStringToMutableArray:@"x"];
+    });
+    dispatch_async(queue, ^{
+        [self addStringToMutableArray:@"0"];
+    });
+    
+    
+     
+    [self performSelector:@selector(printArray) withObject:nil afterDelay:3];
+
+    
+    
     return YES;
+}
+    // вызов метода в бекнраунде
+- (void) testThreadInBackground {
+    for (int i = 0; i < 2000; i++) {
+        NSLog(@"%d", i);
+    }
+}
+
+    // autoreleasePool
+- (void) autoreleasePool {
+    @autoreleasepool {  // это вроде как в новых версиях не важно
+        double startTime = CACurrentMediaTime();
+        NSLog(@"%@ was started", [[NSThread currentThread] name]); // возвращает имя текущего потока
+        for (int i = 0; i < 20000000; i++) {
+//            NSLog(@"%d", i);
+        }
+        NSLog(@"%@ was finished %f", [[NSThread currentThread] name], CACurrentMediaTime() - startTime);
+    }
 }
 
 
+    // добавляем строки в массив
+- (void) addStringToMutableArray: (NSString *) string {
+    @autoreleasepool {  // это вроде как в новых версиях не важно
+        double startTime = CACurrentMediaTime();
+        NSLog(@"%@ was started", [[NSThread currentThread] name]);
+//        @synchronized (self) {  // тот поток который первый зайдет в @synchronized будет выполнятся первым, остальные будут вставать в очередь за ним
+            for (int i = 0; i < 100000; i++) {
+                [self.array addObject:string];
+            }
+//        }
+        NSLog(@"%@ was finished %f", [[NSThread currentThread] name], CACurrentMediaTime() - startTime);
+    }
+}
+    // выводим массив
+- (void) printArray {
+    NSLog(@"%@", self.array);
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application {
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    
 }
 
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    
 }
 
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-    // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+
 }
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    
 }
 
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    
 }
 
 
